@@ -1,4 +1,4 @@
-from .category import Category
+from .category import Category # . called relative import.
 from .plat import Plat
 from .client import Client
 from .commande import Commande

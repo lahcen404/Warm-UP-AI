@@ -305,3 +305,86 @@ with SessionLocal() as session:
             row.nom,
             row.nom_plat
               )
+
+
+# 16 --- Afficher les clients ayant passé une commande d’un montant supérieur à 150, avec leur numéro de téléphone.
+
+with SessionLocal() as session:
+    
+    stmt = select(Client.nom,
+                  Commande.total,
+                  Client.telephone
+                  ).join(
+                      Commande,
+                      Commande.client_id == Client.id
+                      ).where(
+                      Commande.total > 150
+                  )
+                  
+    results_clients = session.execute(stmt).all()
+    
+    for cl in results_clients:
+        print(
+            cl.nom,
+            cl.total,
+            cl.telephone
+        )
+        
+        
+# 17 --- Plat Cout Total ingredients superireur 50% price Plat
+
+with SessionLocal() as session:
+    
+    stmt = select(Plat.nom,
+                  Plat.prix,
+                  func.sum(Ingredient.cout_unitaire * PlatIngredient.quantite_necessaire)
+                       .label("cout_total_ingredients"),
+                  ).join(
+                      PlatIngredient,
+                      Plat.id == PlatIngredient.plat_id
+                  ).join(
+                      Ingredient,
+                      Ingredient.id == PlatIngredient.ingredient_id
+                  ).group_by(
+                      Plat.nom,
+                      Plat.prix
+                  ).having(
+                      func.sum(Ingredient.cout_unitaire * PlatIngredient.quantite_necessaire) > Plat.prix / 2
+                  )
+                  
+    results1 = session.execute(stmt).all()
+    for pl in results1:
+        print(pl.nom,
+              pl.prix,
+              pl.cout_total_ingredients)
+        
+        
+# 18 - add new dish with two ingredients 
+
+with SessionLocal() as session:
+    plat = Plat(
+        id=11,
+        nom="Salade Veg",
+        prix=20.00,
+        description="Salade Végétarien",
+        categorie_id=5
+    )
+    
+    #session.add(plat)
+    #session.commit()
+    print("plaaat added successs !!")
+    
+    
+#19 delete client
+from sqlalchemy import delete
+
+with SessionLocal() as session:
+    
+    client = session.scalar(
+        select(Client).where(
+            Client.nom == "Youssef El Khalfi")
+    )
+    
+    session.delete(client)
+    session.commit()
+    print("Youssef Khalfiii  deleted successs !!")

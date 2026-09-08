@@ -27,9 +27,11 @@ class Client(Base):
     )
 
     commandes: Mapped[list["Commande"]] = relationship(
-        back_populates="client"
+        back_populates="client",
+        cascade="all, delete-orphan"
     )
 
     avis: Mapped[list["Avis"]] = relationship(
-        back_populates="client"
+        back_populates="client",
+        cascade="all, delete-orphan"
     )

@@ -34,5 +34,6 @@ class Commande(Base):
     )
 
     commande_plats: Mapped[list["CommandePlat"]] = relationship(
-        back_populates="commande"
+        back_populates="commande",
+        cascade="all, delete-orphan"
     )

@@ -5,6 +5,7 @@ from sqlalchemy import (
     asc,
     and_,
     or_,
+    
 )
 
 from app.database import SessionLocal
@@ -50,7 +51,8 @@ with SessionLocal() as session:
 
 with SessionLocal() as session:
     
-    stmt = select(Client).where(or_(Client.nom.like("S%"), Client.nom.like("F%")))
+    stmt = select(Client).where(or_(Client.nom.like("S%"),
+                                    Client.nom.like("F%")))
     
     clients = session.scalars(stmt).all()
     
@@ -385,6 +387,102 @@ with SessionLocal() as session:
             Client.nom == "Youssef El Khalfi")
     )
     
-    session.delete(client)
+    #session.delete(client)
     session.commit()
     print("Youssef Khalfiii  deleted successs !!")
+    
+    
+# 20 --- Afficher pour chaque client (nom - nombre total de plats commandés - montant total dépensé - note moyenne de leurs avis )
+
+with SessionLocal() as session:
+    
+    
+    total_plats = (
+        select(
+            Commande.client_id,
+            func.sum(CommandePlat.quantite).label("total_plats_commande")
+        ).join(
+            CommandePlat,
+            CommandePlat.commande_id == Commande.id
+        ).group_by(
+            Commande.client_id
+        ).subquery()
+    )
+    
+    total_depense = (
+        select(
+            Commande.client_id,
+            func.sum(Commande.total).label("total_depenses")
+        ).group_by(
+            Commande.client_id
+        ).subquery()
+    )
+    
+    avg_avis =(
+        select(
+            Avis.client_id,
+            func.avg(Avis.note).label("avvg_avis")
+        ).group_by(
+            Avis.client_id
+        ).subquery()
+    )
+    
+    stmt = (
+        select(Client.nom,
+                    total_plats.c.total_plats_commande,
+                    total_depense.c.total_depenses,
+                    avg_avis.c.avvg_avis
+                ).outerjoin(
+                    total_plats,
+                    Client.id == total_plats.c.client_id
+                ).outerjoin(
+                    total_depense,
+                    Client.id == total_depense.c.client_id
+                ).outerjoin(
+                    avg_avis,
+                    Client.id == avg_avis.c.client_id
+                )
+            )
+                
+    results = session.execute(stmt).all()
+    for row in results:
+        print(
+            row.nom,
+            row.total_plats_commande,
+            row.total_depenses,
+            row.avvg_avis
+        )
+        
+        
+# 21 --- Lister les 3 plats les plus commandés (par quantité totale) avec leur catégorie
+
+with SessionLocal() as session:
+    
+    stmt = (
+        select(
+            Plat.nom,
+            func.sum(CommandePlat.quantite).label("total_quantity"),
+            Category.nom.label("category_name")
+        ).join(
+            CommandePlat,
+            CommandePlat.plat_id == Plat.id
+        ).join(
+            Category,
+            Category.id == Plat.categorie_id
+        ).group_by(
+            Plat.id,
+            Plat.nom,
+            Category.nom
+        ).order_by(
+            func.sum(CommandePlat.quantite).desc()
+        ).limit(3)
+    )
+    
+    resultss = session.execute(stmt).all()
+    
+    for row in resultss:
+        print(
+            row.nom,
+            row.total_quantity,
+            row.category_name
+            )

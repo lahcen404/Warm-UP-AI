@@ -486,3 +486,14 @@ with SessionLocal() as session:
             row.total_quantity,
             row.category_name
             )
+        
+        
+# 22 ---- Afficher les clients et leurs dernières commandes, incluant les plats commandés.
+
+with SessionLocal() as session:
+    stmt = (
+        select(
+            Client.nom,
+            
+        )
+    )

@@ -14,10 +14,10 @@ def recuperer_donnees_meteo():
     
     try:
         # --- TON CODE ICI : Utilise la bibliothèque 'requests' pour faire un 'get' sur l'url ---
-        reponse = ... 
+        reponse = requests.get(url)
         
         # --- TON CODE ICI : Convertis la réponse au format '.json()' ---
-        donnees_brutes = ...
+        donnees_brutes = reponse.json()
         
         print("✅ Données récupérées avec succès depuis internet !")
         return donnees_brutes
@@ -41,7 +41,7 @@ def nettoyer_donnees(donnees_brutes):
     donnees_utiles = donnees_brutes['daily']
     
     # --- TON CODE ICI : Transforme le dictionnaire 'donnees_utiles' en un DataFrame Pandas ---
-    df = ...
+    df = pd.DataFrame(donnees_utiles)
     
     # On renomme les colonnes pour que ce soit plus clair (C'est cadeau !)
     df.columns = ['Date', 'Temp_Max', 'Temp_Min']
@@ -56,10 +56,10 @@ def afficher_statistiques(df):
     print("\n📊 --- STATISTIQUES DE LA SEMAINE ---")
     
     # --- TON CODE ICI : Utilise numpy (np) pour calculer la moyenne (mean) de la colonne 'Temp_Max' ---
-    moyenne_max = ...
+    moyenne_max = np.mean(df['Temp_Max'])
     
     # --- TON CODE ICI : Utilise numpy pour trouver la valeur maximale (max) de la colonne 'Temp_Max' ---
-    pic_chaleur = ...
+    pic_chaleur = np.max(df['Temp_Max'])
     
     print(f"👉 Température maximale moyenne : {moyenne_max:.2f}°C")
     print(f"👉 Pic de chaleur de la semaine : {pic_chaleur}°C\n")
@@ -71,9 +71,8 @@ def exporter_vers_csv(df, nom_fichier="meteo_casablanca.csv"):
     """
     print(f"⏳ Sauvegarde en cours vers {nom_fichier}...")
     
-    # --- TON CODE ICI : Utilise la méthode Pandas pour exporter 'df' en CSV. 
     # N'oublie pas l'argument index=False pour ne pas exporter les numéros de lignes ---
-    ...
+    df.to_csv(nom_fichier, index=False)
     
     print("✅ Sauvegarde terminée. Beau travail !")
 
